@@ -5,7 +5,7 @@ import "./globals.css";
 const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL("https://azzura-murano.ozankosulgangster.chatgpt.site"),
   title: "Azzura — Handmade Murano Glass",
   description: "Handmade Murano glass accessories, shaped in Venice and designed to live with you.",
   openGraph: {
