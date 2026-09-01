@@ -14,9 +14,9 @@ const products = [
   { id: 7, name: "Caterina Necklace", collection: "Classico", price: 175, image: "/caterina-necklace.jpg" },
   { id: 8, name: "Sommerso Necklace", collection: "Artista", price: 245, image: "/sommerso-necklace.jpg" },
   { id: 9, name: "Essenza Perfume Pendant", collection: "Classico", price: 135, image: "/essenza-perfume-pendants.jpg" },
-  { id: 10, name: "Laguna Ring", collection: "Artista", price: 120, image: "/laguna-rings.jpg" },
-  { id: 11, name: "Passione Ring", collection: "Artista", price: 115, image: "/passione-rings.jpg" },
-  { id: 12, name: "Jessica Necklace", collection: "Classico", price: 195, image: "/jessica-necklace.jpg" },
+  { id: 10, name: "Laguna Ring", collection: "Artista", price: 15, image: "/laguna-rings.jpg" },
+  { id: 11, name: "Passione Ring", collection: "Artista", price: 17, image: "/passione-rings.jpg" },
+  { id: 12, name: "Jessica Necklace", collection: "Classico", price: 65, image: "/jessica-necklace.jpg" },
   { id: 13, name: "Mosaico Necklace", collection: "Artista", price: 225, image: "/mosaico-necklace.jpg" },
 ] as const;
 
@@ -45,7 +45,7 @@ export default function Home() {
     <main>
       <div className="announcement">
         <span>Handmade in Murano, Venezia</span>
-        <span>Complimentary shipping over €180</span>
+        <span>Complimentary shipping over CA$180</span>
       </div>
 
       <header className="site-header">
@@ -96,7 +96,7 @@ export default function Home() {
                 <button type="button" className="quick-add" onClick={() => addToBag(product.id)}>Add to bag <span aria-hidden="true">+</span></button>
               </div>
               <div className="product-meta">
-                <div><h3>{product.name}</h3><p>{product.collection}</p></div><span>€{product.price}</span>
+                <div><h3>{product.name}</h3><p>{product.collection}</p></div><span>CA${product.price}</span>
               </div>
             </article>
           ))}
@@ -158,9 +158,9 @@ export default function Home() {
         <aside className="bag-panel" onClick={(event) => event.stopPropagation()}>
           <div className="bag-heading"><div><p className="eyebrow">Your selection</p><h2>Bag ({cart.length})</h2></div><button className="close" type="button" onClick={() => setBagOpen(false)} aria-label="Close bag">×</button></div>
           <div className="bag-items">
-            {cartItems.length === 0 ? <div className="empty-bag"><p>Your bag is waiting for something beautiful.</p><button type="button" onClick={() => setBagOpen(false)}>Explore the collection</button></div> : cartItems.map((item, index) => <div className="bag-item" key={`${item.id}-${index}`}><img src={item.image} alt="" /><div><h3>{item.name}</h3><p>{item.collection}</p><span>€{item.price}</span></div><button type="button" aria-label={`Remove ${item.name}`} onClick={() => setCart((items) => items.filter((_, itemIndex) => itemIndex !== index))}>Remove</button></div>)}
+            {cartItems.length === 0 ? <div className="empty-bag"><p>Your bag is waiting for something beautiful.</p><button type="button" onClick={() => setBagOpen(false)}>Explore the collection</button></div> : cartItems.map((item, index) => <div className="bag-item" key={`${item.id}-${index}`}><img src={item.image} alt="" /><div><h3>{item.name}</h3><p>{item.collection}</p><span>CA${item.price}</span></div><button type="button" aria-label={`Remove ${item.name}`} onClick={() => setCart((items) => items.filter((_, itemIndex) => itemIndex !== index))}>Remove</button></div>)}
           </div>
-          {cartItems.length > 0 && <div className="bag-total"><p><span>Subtotal</span><strong>€{total}</strong></p><button type="button">Checkout <span>→</span></button><small>Shipping calculated at checkout.</small></div>}
+          {cartItems.length > 0 && <div className="bag-total"><p><span>Subtotal</span><strong>CA${total}</strong></p><button type="button">Checkout <span>→</span></button><small>Shipping calculated at checkout.</small></div>}
         </aside>
       </div>}
     </main>
