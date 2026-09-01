@@ -61,11 +61,9 @@ button { color:inherit; font:inherit; }
 .filters button { padding:10px 16px; border:1px solid var(--line); background:transparent; cursor:pointer; font-size:10px; letter-spacing:.13em; text-transform:uppercase; }
 .filters button.active { background:var(--ink); color:white; border-color:var(--ink); }
 .product-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-.product-image-wrap { position:relative; aspect-ratio:4/5; overflow:hidden; background:#ebe4d8; }
-.product-image-wrap img { width:100%; height:100%; object-fit:cover; transition:transform .65s cubic-bezier(.2,.7,.2,1); }
+.product-image-wrap { position:relative; aspect-ratio:1; overflow:hidden; background:#fff; border:1px solid rgba(23,42,53,.08); }
+.product-image-wrap img { width:100%; height:100%; padding:10px; object-fit:contain; transition:transform .65s cubic-bezier(.2,.7,.2,1); }
 .product-card:hover img { transform:scale(1.035); }
-.product-card.alternate-crop img { transform:scale(1.22); }
-.product-card.alternate-crop:hover img { transform:scale(1.26); }
 .quick-add { position:absolute; left:14px; right:14px; bottom:14px; display:flex; justify-content:space-between; padding:14px 16px; border:0; background:rgba(250,248,243,.94); color:var(--ink); cursor:pointer; font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; opacity:0; transform:translateY(10px); transition:opacity 180ms ease,transform 180ms ease,background 180ms ease; }
 .product-card:hover .quick-add,.quick-add:focus-visible { opacity:1; transform:translateY(0); }
 .quick-add:hover { background:var(--wine); color:white; }
@@ -79,8 +77,9 @@ button { color:inherit; font:inherit; }
 .duo-panels { background:var(--ivory); }
 .collection-panel { min-height:720px; display:grid; grid-template-columns:1fr 1fr; }
 .collection-panel.artista { background:var(--wine); color:#fffaf0; }
-.panel-visual { min-height:600px; overflow:hidden; }
-.panel-visual img { width:100%; height:100%; object-fit:cover; }
+.panel-visual { min-height:600px; display:grid; place-items:center; overflow:hidden; background:#fff; }
+.panel-visual img { width:82%; height:82%; object-fit:contain; transition:transform .7s ease; }
+.collection-panel:hover .panel-visual img { transform:scale(1.035); }
 .panel-copy { display:flex; flex-direction:column; justify-content:center; padding:8vw; }
 .panel-copy h2 { font-size:clamp(48px,5.2vw,82px); line-height:.98; }
 .panel-copy>p:not(.eyebrow) { max-width:480px; margin:34px 0; font-family:Georgia,"Times New Roman",serif; font-size:17px; line-height:1.65; }

@@ -5,10 +5,19 @@ import { useMemo, useState } from "react";
 type Collection = "All" | "Classico" | "Artista";
 
 const products = [
-  { id: 1, name: "Acqua Pendant", collection: "Classico", price: 145, image: "/acqua-pendant.png", position: "center" },
-  { id: 2, name: "Laguna Earrings", collection: "Artista", price: 175, image: "/laguna-earrings.png", position: "center" },
-  { id: 3, name: "Riva Pendant", collection: "Classico", price: 155, image: "/acqua-pendant.png", position: "54% 66%" },
-  { id: 4, name: "Fuoco Earrings", collection: "Artista", price: 185, image: "/laguna-earrings.png", position: "58% 42%" },
+  { id: 1, name: "Carnevale Bracelet", collection: "Artista", price: 95, image: "/carnevale-bracelets.jpg" },
+  { id: 2, name: "Cuore Grande Pendant", collection: "Artista", price: 125, image: "/cuore-grande-pendants.jpg" },
+  { id: 3, name: "Cuore Piccolo Pendant", collection: "Classico", price: 95, image: "/cuore-piccolo-pendants.jpg" },
+  { id: 4, name: "Allegra Bracelet", collection: "Artista", price: 110, image: "/allegra-bracelets.jpg" },
+  { id: 5, name: "Trio Necklace", collection: "Classico", price: 145, image: "/co313a-necklace.jpg" },
+  { id: 6, name: "Brasilia Necklace", collection: "Classico", price: 165, image: "/brasilia-necklace.jpg" },
+  { id: 7, name: "Caterina Necklace", collection: "Classico", price: 175, image: "/caterina-necklace.jpg" },
+  { id: 8, name: "Sommerso Necklace", collection: "Artista", price: 245, image: "/sommerso-necklace.jpg" },
+  { id: 9, name: "Essenza Perfume Pendant", collection: "Classico", price: 135, image: "/essenza-perfume-pendants.jpg" },
+  { id: 10, name: "Laguna Ring", collection: "Artista", price: 120, image: "/laguna-rings.jpg" },
+  { id: 11, name: "Passione Ring", collection: "Artista", price: 115, image: "/passione-rings.jpg" },
+  { id: 12, name: "Jessica Necklace", collection: "Classico", price: 195, image: "/jessica-necklace.jpg" },
+  { id: 13, name: "Mosaico Necklace", collection: "Artista", price: 225, image: "/mosaico-necklace.jpg" },
 ] as const;
 
 export default function Home() {
@@ -81,9 +90,9 @@ export default function Home() {
         </div>
         <div className="product-grid">
           {visibleProducts.map((product) => (
-            <article className={`product-card ${product.id > 2 ? "alternate-crop" : ""}`} key={product.id}>
+            <article className="product-card" key={product.id}>
               <div className="product-image-wrap">
-                <img src={product.image} style={{ objectPosition: product.position }} alt={`${product.name}, handmade Murano glass`} />
+                <img src={product.image} alt={`${product.name}, handmade Murano glass`} />
                 <button type="button" className="quick-add" onClick={() => addToBag(product.id)}>Add to bag <span aria-hidden="true">+</span></button>
               </div>
               <div className="product-meta">
@@ -97,12 +106,12 @@ export default function Home() {
 
       <section className="duo-panels">
         <article className="collection-panel classico" id="classico">
-          <div className="panel-visual"><img src="/acqua-pendant.png" alt="Blue glass Acqua pendant" /></div>
+          <div className="panel-visual"><img src="/caterina-necklace.jpg" alt="Caterina handmade Murano glass necklace" /></div>
           <div className="panel-copy"><p className="eyebrow">01 · Classico</p><h2>Essential forms,<br />enduring colour.</h2><p>Quiet, balanced pieces made for every day—each with the subtle variations that reveal the hand of its maker.</p><button type="button" onClick={() => { setFilter("Classico"); document.querySelector(".shop")?.scrollIntoView(); }}>Shop Classico <span>→</span></button></div>
         </article>
         <article className="collection-panel artista" id="artista">
           <div className="panel-copy"><p className="eyebrow">02 · Artista</p><h2>Colour without<br />compromise.</h2><p>Unexpected forms and vivid combinations, created in small editions for collectors of the singular.</p><button type="button" onClick={() => { setFilter("Artista"); document.querySelector(".shop")?.scrollIntoView(); }}>Shop Artista <span>→</span></button></div>
-          <div className="panel-visual"><img src="/laguna-earrings.png" alt="Cobalt and amber glass earrings" /></div>
+          <div className="panel-visual"><img src="/sommerso-necklace.jpg" alt="Sommerso handmade Murano glass necklace" /></div>
         </article>
       </section>
 
@@ -140,7 +149,7 @@ export default function Home() {
         <div className="search-panel" onClick={(event) => event.stopPropagation()}>
           <button className="close" type="button" onClick={() => setSearchOpen(false)} aria-label="Close search">×</button>
           <p className="eyebrow">Search Azzura</p><h2>What are you looking for?</h2>
-          <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Pendant, earrings…" aria-label="Search query" />
+          <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Necklace, bracelet, ring…" aria-label="Search query" />
           <button className="search-action" type="button" onClick={() => { setSearchOpen(false); document.querySelector(".shop")?.scrollIntoView(); }}>View {visibleProducts.length} pieces →</button>
         </div>
       </div>}
