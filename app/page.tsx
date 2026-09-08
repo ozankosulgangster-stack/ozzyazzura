@@ -17,7 +17,7 @@ const products = [
   { id: 10, name: "Laguna Ring", collection: "Artista", price: 15, image: "/laguna-rings.jpg" },
   { id: 11, name: "Passione Ring", collection: "Artista", price: 17, image: "/passione-rings.jpg" },
   { id: 12, name: "Jessica Necklace", collection: "Classico", price: 79, image: "/jessica-necklace.jpg" },
-  { id: 13, name: "Mosaico Necklace", collection: "Artista", price: 225, image: "/mosaico-necklace.jpg" },
+  { id: 13, name: "Mosaico Necklace", collection: "Artista", price: 49.99, image: "/mosaico-necklace.jpg" },
   { id: 14, name: "Asola Bracelet", collection: "Classico", price: 39, image: "/asola-bracelet.jpg" },
   { id: 15, name: "Millefiori Sterling Silver Set", collection: "Artista", price: 49, image: "/millefiori-silver-set.jpg" },
   { id: 16, name: "Space Azure Watch", collection: "Artista", price: 99, image: "/space-azure-watch.jpg" },
