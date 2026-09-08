@@ -6,7 +6,7 @@ type Collection = "All" | "Classico" | "Artista";
 
 const products = [
   { id: 1, name: "Carnevale Bracelet", collection: "Artista", price: 95, image: "/carnevale-bracelets.jpg" },
-  { id: 2, name: "Cuore Grande Pendant", collection: "Artista", price: 125, image: "/cuore-grande-pendants.jpg" },
+  { id: 2, name: "Cuore Grande Pendant", collection: "Artista", price: 24.99, image: "/cuore-grande-pendants.jpg" },
   { id: 3, name: "Cuore Piccolo Pendant", collection: "Classico", price: 95, image: "/cuore-piccolo-pendants.jpg" },
   { id: 4, name: "Allegra Bracelet", collection: "Artista", price: 110, image: "/allegra-bracelets.jpg" },
   { id: 5, name: "Trio Necklace", collection: "Classico", price: 145, image: "/co313a-necklace.jpg" },
@@ -20,7 +20,10 @@ const products = [
   { id: 13, name: "Mosaico Necklace", collection: "Artista", price: 225, image: "/mosaico-necklace.jpg" },
   { id: 14, name: "Asola Bracelet", collection: "Classico", price: 39, image: "/asola-bracelet.jpg" },
   { id: 15, name: "Millefiori Sterling Silver Set", collection: "Artista", price: 49, image: "/millefiori-silver-set.jpg" },
+  { id: 16, name: "Space Azure Watch", collection: "Artista", price: 99, image: "/space-azure-watch.jpg" },
 ] as const;
+
+const formatPrice = (price: number) => `CA$${price.toFixed(Number.isInteger(price) ? 0 : 2)}`;
 
 export default function Home() {
   const [filter, setFilter] = useState<Collection>("All");
@@ -98,7 +101,7 @@ export default function Home() {
                 <button type="button" className="quick-add" onClick={() => addToBag(product.id)}>Add to bag <span aria-hidden="true">+</span></button>
               </div>
               <div className="product-meta">
-                <div><h3>{product.name}</h3><p>{product.collection}</p></div><span>CA${product.price}</span>
+                <div><h3>{product.name}</h3><p>{product.collection}</p></div><span>{formatPrice(product.price)}</span>
               </div>
             </article>
           ))}
@@ -160,9 +163,9 @@ export default function Home() {
         <aside className="bag-panel" onClick={(event) => event.stopPropagation()}>
           <div className="bag-heading"><div><p className="eyebrow">Your selection</p><h2>Bag ({cart.length})</h2></div><button className="close" type="button" onClick={() => setBagOpen(false)} aria-label="Close bag">×</button></div>
           <div className="bag-items">
-            {cartItems.length === 0 ? <div className="empty-bag"><p>Your bag is waiting for something beautiful.</p><button type="button" onClick={() => setBagOpen(false)}>Explore the collection</button></div> : cartItems.map((item, index) => <div className="bag-item" key={`${item.id}-${index}`}><img src={item.image} alt="" /><div><h3>{item.name}</h3><p>{item.collection}</p><span>CA${item.price}</span></div><button type="button" aria-label={`Remove ${item.name}`} onClick={() => setCart((items) => items.filter((_, itemIndex) => itemIndex !== index))}>Remove</button></div>)}
+            {cartItems.length === 0 ? <div className="empty-bag"><p>Your bag is waiting for something beautiful.</p><button type="button" onClick={() => setBagOpen(false)}>Explore the collection</button></div> : cartItems.map((item, index) => <div className="bag-item" key={`${item.id}-${index}`}><img src={item.image} alt="" /><div><h3>{item.name}</h3><p>{item.collection}</p><span>{formatPrice(item.price)}</span></div><button type="button" aria-label={`Remove ${item.name}`} onClick={() => setCart((items) => items.filter((_, itemIndex) => itemIndex !== index))}>Remove</button></div>)}
           </div>
-          {cartItems.length > 0 && <div className="bag-total"><p><span>Subtotal</span><strong>CA${total}</strong></p><button type="button">Checkout <span>→</span></button><small>Shipping calculated at checkout.</small></div>}
+          {cartItems.length > 0 && <div className="bag-total"><p><span>Subtotal</span><strong>{formatPrice(total)}</strong></p><button type="button">Checkout <span>→</span></button><small>Shipping calculated at checkout.</small></div>}
         </aside>
       </div>}
     </main>
