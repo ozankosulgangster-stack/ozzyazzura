@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { type Collection, formatPrice, products } from "@/lib/catalog";
 import { calculateShipping } from "@/lib/shipping";
+import ContactForm from "./ContactForm";
+import SubscribeForm from "./SubscribeForm";
 
 export default function Home() {
   const [filter, setFilter] = useState<Collection>("All");
@@ -73,7 +75,7 @@ export default function Home() {
       <header className="site-header">
         <a className="wordmark" href="#" aria-label="Azzura home">AZZURA</a>
         <nav className="desktop-nav" aria-label="Main navigation">
-          <a href="#collections">Shop</a><a href="#classico">Classico</a><a href="#artista">Artista</a><a href="#leather">Leather</a><a href="/track">Track order</a><a href="/account">Account</a>
+          <a href="#collections">Shop</a><a href="#classico">Classico</a><a href="#artista">Artista</a><a href="#leather">Leather</a><a href="#story">Our story</a><a href="#contact">Contact</a>
         </nav>
         <div className="header-tools">
           <button type="button" onClick={() => setSearchOpen(true)} aria-label="Open search">Search</button>
@@ -179,6 +181,23 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="our-story" id="story" aria-labelledby="story-title">
+        <div className="story-heading">
+          <p className="eyebrow">Our story · Italy to North America</p>
+          <h2 id="story-title">Design, chosen<br />with care.</h2>
+        </div>
+        <div className="story-copy">
+          <p>We believe thoughtful design should make everyday life feel more considered. Azzura works with designers and specialist suppliers across Italy, selecting pieces for their beauty, craft, and lasting quality.</p>
+          <p>Every collection is carefully curated—from Murano glass shaped in Venice to leather goods finished in Florence—so exceptional Italian design can be enjoyed at a reasonable price.</p>
+          <p className="story-mission">Our mission is simple: bring the best of Italian design and quality to North America, with personal service that makes every purchase feel special.</p>
+        </div>
+        <div className="story-values">
+          <div><span>01</span><h3>Design first</h3><p>Distinctive forms selected for beauty, function, and longevity.</p></div>
+          <div><span>02</span><h3>Italian partnerships</h3><p>Trusted relationships with designers and specialist makers throughout Italy.</p></div>
+          <div><span>03</span><h3>Considered value</h3><p>Excellent materials and workmanship at prices made for real life.</p></div>
+        </div>
+      </section>
+
       <section className="promises" aria-label="Our promises">
         <div><span>01</span><h3>Glass from Venice</h3><p>Murano glass crafted by hand on the Venetian island.</p></div>
         <div><span>02</span><h3>Leather from Florence</h3><p>Italian leather bags and accessories finished by Florentine artisans.</p></div>
@@ -188,13 +207,18 @@ export default function Home() {
       <section className="newsletter" aria-labelledby="newsletter-title">
         <p className="eyebrow">Letters from the lagoon</p><h2 id="newsletter-title">A little Venice,<br />now and then.</h2>
         <p>New pieces, atelier stories, and colour inspiration—sent with restraint.</p>
-        <form onSubmit={(event) => event.preventDefault()}><label className="sr-only" htmlFor="email">Email address</label><input id="email" type="email" placeholder="Your email address" required /><button type="submit">Subscribe <span>→</span></button></form>
+        <SubscribeForm />
+      </section>
+
+      <section className="contact-section" id="contact" aria-labelledby="contact-title">
+        <div><p className="eyebrow">Connect with Azzura</p><h2 id="contact-title">Let’s talk<br />Italian design.</h2><p>Questions about a piece, an order, or our collections? Send us a note and we’ll respond personally.</p></div>
+        <ContactForm />
       </section>
 
       <footer>
         <a className="wordmark footer-mark" href="#">AZZURA</a>
         <div><p>Murano, Venezia<br />Firenze, Toscana</p><p>Italian craft,<br />made by hand.</p></div>
-        <nav aria-label="Footer navigation"><a href="#collections">Shop</a><a href="#atelier">Our story</a><a href="/track">Track order</a><a href="/account">My account</a></nav>
+        <nav aria-label="Footer navigation"><a href="#collections">Shop</a><a href="#story">Our story</a><a href="#contact">Contact</a><a href="/track">Track order</a><a href="/account">My account</a></nav>
         <div className="footer-end"><p>Instagram&nbsp;&nbsp; Pinterest</p><p>© 2026 Azzura Venezia</p></div>
       </footer>
 

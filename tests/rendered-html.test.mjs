@@ -22,6 +22,10 @@ test("server-renders the Azzura commerce storefront", async () => {
   assert.match(html, /Mosaico Necklace/);
   assert.match(html, /CA\$49\.99/);
   assert.match(html, /Bobbi Leather Bag/);
+  assert.match(html, /Design, chosen/);
+  assert.match(html, /Italian partnerships/);
+  assert.match(html, /href="#contact"/);
+  assert.match(html, /By subscribing, you agree to receive Azzura news/);
   assert.match(html, /href="\/track"/);
   assert.match(html, /href="\/account"/);
   assert.match(html, /Bag \(/);
@@ -37,10 +41,13 @@ test("renders the public order-tracking page", async () => {
 });
 
 test("keeps pricing authoritative and payment secrets server-side", async () => {
-  const [page, checkout, migration, hosting] = await Promise.all([
+  const [page, checkout, migration, contactsMigration, subscribersApi, contactApi, hosting] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/checkout/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../drizzle/0000_brainy_the_hunter.sql", import.meta.url), "utf8"),
+    readFile(new URL("../drizzle/0001_fearless_wendell_rand.sql", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/subscribers/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/contact/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
   ]);
   assert.doesNotMatch(page, /STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET/);
@@ -51,5 +58,10 @@ test("keeps pricing authoritative and payment secrets server-side", async () => 
   assert.match(migration, /CREATE TABLE `customers`/);
   assert.match(migration, /CREATE TABLE `orders`/);
   assert.match(migration, /CREATE TABLE `order_items`/);
+  assert.match(contactsMigration, /CREATE TABLE `contact_messages`/);
+  assert.match(contactsMigration, /CREATE TABLE `subscribers`/);
+  assert.match(contactsMigration, /PRAGMA optimize/);
+  assert.match(subscribersApi, /ON CONFLICT\(email\) DO UPDATE/);
+  assert.match(contactApi, /marketingOptIn/);
   assert.equal(JSON.parse(hosting).d1, "DB");
 });

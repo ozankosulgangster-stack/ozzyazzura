@@ -56,3 +56,27 @@ export const orderItems = sqliteTable("order_items", {
   unitPriceCents: integer("unit_price_cents").notNull(),
   quantity: integer("quantity").notNull(),
 }, (table) => [index("idx_order_items_order_id").on(table.orderId)]);
+
+export const subscribers = sqliteTable("subscribers", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  email: text("email").notNull(),
+  fullName: text("full_name"),
+  source: text("source").notNull().default("newsletter"),
+  status: text("status").notNull().default("active"),
+  consentAt: text("consent_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  uniqueIndex("idx_subscribers_email").on(table.email),
+  index("idx_subscribers_status").on(table.status),
+]);
+
+export const contactMessages = sqliteTable("contact_messages", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  message: text("message").notNull(),
+  marketingOptIn: integer("marketing_opt_in", { mode: "boolean" }).notNull().default(false),
+  status: text("status").notNull().default("new"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [index("idx_contact_messages_status_created_at").on(table.status, table.createdAt)]);
