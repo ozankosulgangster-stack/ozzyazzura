@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-type Collection = "All" | "Classico" | "Artista";
+type Collection = "All" | "Classico" | "Artista" | "Leather";
 
 const products = [
   { id: 1, name: "Carnevale Bracelet", collection: "Artista", price: 95, image: "/carnevale-bracelets.jpg" },
@@ -21,6 +21,8 @@ const products = [
   { id: 14, name: "Asola Bracelet", collection: "Classico", price: 39, image: "/asola-bracelet.jpg" },
   { id: 15, name: "Millefiori Sterling Silver Set", collection: "Artista", price: 49, image: "/millefiori-silver-set.jpg" },
   { id: 16, name: "Space Azure Watch", collection: "Artista", price: 99, image: "/space-azure-watch.jpg" },
+  { id: 17, name: "Grazia Leather Handbag", collection: "Leather", price: 159, image: "/grazia-nero.jpg" },
+  { id: 18, name: "Ambra Leather Handbag", collection: "Leather", price: 169, image: "/ambra-limone.jpg" },
 ] as const;
 
 const formatPrice = (price: number) => `CA$${price.toFixed(Number.isInteger(price) ? 0 : 2)}`;
@@ -56,7 +58,7 @@ export default function Home() {
       <header className="site-header">
         <a className="wordmark" href="#" aria-label="Azzura home">AZZURA</a>
         <nav className="desktop-nav" aria-label="Main navigation">
-          <a href="#collections">Shop</a><a href="#classico">Classico</a><a href="#artista">Artista</a><a href="#atelier">Our Atelier</a>
+          <a href="#collections">Shop</a><a href="#classico">Classico</a><a href="#artista">Artista</a><a href="#leather">Leather</a><a href="#atelier">Our Atelier</a>
         </nav>
         <div className="header-tools">
           <button type="button" onClick={() => setSearchOpen(true)} aria-label="Open search">Search</button>
@@ -88,7 +90,7 @@ export default function Home() {
         <div className="shop-header">
           <div><p className="eyebrow">The collection</p><h2 id="shop-title">Wearable light</h2></div>
           <div className="filters" aria-label="Filter products">
-            {(["All", "Classico", "Artista"] as Collection[]).map((item) => (
+            {(["All", "Classico", "Artista", "Leather"] as Collection[]).map((item) => (
               <button key={item} className={filter === item ? "active" : ""} type="button" onClick={() => setFilter(item)}>{item}</button>
             ))}
           </div>
@@ -97,7 +99,7 @@ export default function Home() {
           {visibleProducts.map((product) => (
             <article className="product-card" key={product.id}>
               <div className="product-image-wrap">
-                <img src={product.image} alt={`${product.name}, handmade Murano glass`} />
+                <img src={product.image} alt={product.collection === "Leather" ? `${product.name}, handmade Italian leather` : `${product.name}, handmade Murano glass`} />
                 <button type="button" className="quick-add" onClick={() => addToBag(product.id)}>Add to bag <span aria-hidden="true">+</span></button>
               </div>
               <div className="product-meta">
@@ -118,6 +120,22 @@ export default function Home() {
           <div className="panel-copy"><p className="eyebrow">02 · Artista</p><h2>Colour without<br />compromise.</h2><p>Unexpected forms and vivid combinations, created in small editions for collectors of the singular.</p><button type="button" onClick={() => { setFilter("Artista"); document.querySelector(".shop")?.scrollIntoView(); }}>Shop Artista <span>→</span></button></div>
           <div className="panel-visual"><img src="/sommerso-necklace.jpg" alt="Sommerso handmade Murano glass necklace" /></div>
         </article>
+      </section>
+
+      <section className="leather-story" id="leather" aria-labelledby="leather-title">
+        <div className="leather-copy">
+          <p className="eyebrow">Italian leather · Firenze</p>
+          <h2 id="leather-title">Soft structure,<br />made to travel.</h2>
+          <p>Hand-finished in Florence from supple Italian leather. Grazia brings polished structure; Ambra is relaxed, compact, and made for every day.</p>
+          <button type="button" onClick={() => { setFilter("Leather"); document.querySelector(".shop")?.scrollIntoView(); }}>Shop leather <span>→</span></button>
+          <div className="leather-prices"><span>Grazia · CA$159</span><span>Ambra · CA$169</span></div>
+        </div>
+        <div className="leather-gallery" aria-label="Ambra and Grazia leather handbags">
+          <figure className="leather-main"><img src="/grazia-nero.jpg" alt="Grazia structured black leather handbag" /><figcaption>Grazia · Nero</figcaption></figure>
+          <figure><img src="/ambra-limone.jpg" alt="Ambra leather handbag in Limone yellow" /><figcaption>Ambra · Limone</figcaption></figure>
+          <figure><img src="/ambra-nero.jpg" alt="Ambra leather handbag in Nero black" /><figcaption>Ambra · Nero</figcaption></figure>
+          <figure><img src="/ambra-papavero.jpg" alt="Ambra leather handbag in Papavero orange" /><figcaption>Ambra · Papavero</figcaption></figure>
+        </div>
       </section>
 
       <section className="atelier" id="atelier">
@@ -154,7 +172,7 @@ export default function Home() {
         <div className="search-panel" onClick={(event) => event.stopPropagation()}>
           <button className="close" type="button" onClick={() => setSearchOpen(false)} aria-label="Close search">×</button>
           <p className="eyebrow">Search Azzura</p><h2>What are you looking for?</h2>
-          <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Necklace, bracelet, ring…" aria-label="Search query" />
+          <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Necklace, bracelet, handbag…" aria-label="Search query" />
           <button className="search-action" type="button" onClick={() => { setSearchOpen(false); document.querySelector(".shop")?.scrollIntoView(); }}>View {visibleProducts.length} pieces →</button>
         </div>
       </div>}

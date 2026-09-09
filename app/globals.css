@@ -85,6 +85,20 @@ button { color:inherit; font:inherit; }
 .panel-copy>p:not(.eyebrow) { max-width:480px; margin:34px 0; font-family:Georgia,"Times New Roman",serif; font-size:17px; line-height:1.65; }
 .panel-copy button { align-self:flex-start; display:flex; gap:50px; padding:12px 0; border:0; border-bottom:1px solid currentColor; background:transparent; cursor:pointer; color:inherit; font-size:10px; letter-spacing:.15em; text-transform:uppercase; }
 
+.leather-story { display:grid; grid-template-columns:.8fr 1.2fr; min-height:760px; background:#c8b08f; color:#1f2a25; }
+.leather-copy { display:flex; flex-direction:column; justify-content:center; padding:8vw 6vw 8vw 7.4vw; }
+.leather-copy .eyebrow { color:#6e3327; }
+.leather-copy h2 { margin:0; font-family:Georgia,"Times New Roman",serif; font-size:clamp(48px,5.2vw,82px); font-weight:400; letter-spacing:-.045em; line-height:.98; }
+.leather-copy>p:not(.eyebrow) { max-width:470px; margin:32px 0; font-family:Georgia,"Times New Roman",serif; font-size:17px; line-height:1.65; }
+.leather-copy button { align-self:flex-start; display:flex; gap:50px; padding:12px 0; border:0; border-bottom:1px solid currentColor; background:transparent; cursor:pointer; font-size:10px; letter-spacing:.15em; text-transform:uppercase; }
+.leather-prices { display:flex; gap:28px; margin-top:52px; padding-top:22px; border-top:1px solid rgba(31,42,37,.24); font-size:10px; font-weight:600; letter-spacing:.13em; text-transform:uppercase; }
+.leather-gallery { display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:1fr 1fr; gap:1px; min-height:760px; background:rgba(31,42,37,.18); }
+.leather-gallery figure { position:relative; min-width:0; margin:0; overflow:hidden; background:#fff; }
+.leather-gallery .leather-main { grid-column:1 / 4; }
+.leather-gallery img { width:100%; height:100%; object-fit:contain; padding:16px; transition:transform .7s ease; }
+.leather-gallery figure:hover img { transform:scale(1.035); }
+.leather-gallery figcaption { position:absolute; left:15px; bottom:13px; padding:7px 9px; background:rgba(250,248,243,.9); font-size:8px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; }
+
 .atelier { display:grid; grid-template-columns:1.1fr .9fr; min-height:760px; background:var(--ink); color:#f8f3e9; }
 .atelier-image { min-height:600px; overflow:hidden; }
 .atelier-image img { width:100%; height:100%; object-fit:cover; object-position:72% center; transform:scale(1.1); }
@@ -149,6 +163,8 @@ footer nav { display:flex; flex-direction:column; gap:8px; }
   .collection-panel,.atelier { grid-template-columns:1fr 1fr; }
   .panel-copy,.atelier-copy { padding:7vw; }
   .promises { padding-left:5vw; padding-right:5vw; }
+  .leather-story { grid-template-columns:1fr 1.25fr; }
+  .leather-copy { padding:7vw 5vw; }
   footer { grid-template-columns:1fr 1fr; }
   .footer-end { align-items:flex-start; text-align:left; gap:28px; }
 }
@@ -167,6 +183,10 @@ footer nav { display:flex; flex-direction:column; gap:8px; }
   .panel-copy { min-height:560px; padding:70px 7vw; }
   .collection-panel.artista .panel-copy { order:2; }
   .collection-panel.artista .panel-visual { order:1; }
+  .leather-story { grid-template-columns:1fr; }
+  .leather-copy { min-height:570px; padding:75px 7vw; }
+  .leather-prices { flex-direction:column; gap:12px; }
+  .leather-gallery { min-height:650px; }
   .atelier-image { min-height:540px; }
   .atelier-copy { padding:80px 7vw; }
   .atelier-copy blockquote { margin-top:55px; }
