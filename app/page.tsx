@@ -1,34 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-
-type Collection = "All" | "Classico" | "Artista" | "Leather";
-
-const products = [
-  { id: 1, name: "Carnevale Bracelet", collection: "Artista", price: 95, image: "/carnevale-bracelets.jpg" },
-  { id: 2, name: "Cuore Grande Pendant", collection: "Artista", price: 24.99, image: "/cuore-grande-pendants.jpg" },
-  { id: 3, name: "Cuore Piccolo Pendant", collection: "Classico", price: 95, image: "/cuore-piccolo-pendants.jpg" },
-  { id: 4, name: "Allegra Bracelet", collection: "Artista", price: 110, image: "/allegra-bracelets.jpg" },
-  { id: 5, name: "Trio Necklace", collection: "Classico", price: 145, image: "/co313a-necklace.jpg" },
-  { id: 6, name: "Brasilia Necklace", collection: "Classico", price: 44, image: "/brasilia-necklace.jpg" },
-  { id: 7, name: "Caterina Necklace", collection: "Classico", price: 44, image: "/caterina-necklace.jpg" },
-  { id: 8, name: "Sommerso Necklace", collection: "Artista", price: 245, image: "/sommerso-necklace.jpg" },
-  { id: 9, name: "Essenza Perfume Pendant", collection: "Classico", price: 18, image: "/essenza-perfume-pendants.jpg" },
-  { id: 10, name: "Laguna Ring", collection: "Artista", price: 15, image: "/laguna-rings.jpg" },
-  { id: 11, name: "Passione Ring", collection: "Artista", price: 17, image: "/passione-rings.jpg" },
-  { id: 12, name: "Jessica Necklace", collection: "Classico", price: 79, image: "/jessica-necklace.jpg" },
-  { id: 13, name: "Mosaico Necklace", collection: "Artista", price: 49.99, image: "/mosaico-necklace.jpg" },
-  { id: 14, name: "Asola Bracelet", collection: "Classico", price: 39, image: "/asola-bracelet.jpg" },
-  { id: 15, name: "Millefiori Sterling Silver Set", collection: "Artista", price: 49, image: "/millefiori-silver-set.jpg" },
-  { id: 16, name: "Space Azure Watch", collection: "Artista", price: 99, image: "/space-azure-watch.jpg" },
-  { id: 17, name: "Grazia Leather Handbag", collection: "Leather", price: 159, image: "/grazia-nero.jpg" },
-  { id: 18, name: "Ambra Leather Handbag", collection: "Leather", price: 169, image: "/ambra-limone.jpg" },
-  { id: 19, name: "Bobbi Leather Bag", collection: "Leather", price: 139, image: "/bobbi-argento.jpg" },
-  { id: 20, name: "Lorena Leather Handbag", collection: "Leather", price: 169, image: "/lorena-cammello.jpg" },
-  { id: 21, name: "Rina Leather Wallet", collection: "Leather", price: 99, image: "/rina-cuoio.jpg" },
-] as const;
-
-const formatPrice = (price: number) => `CA$${price.toFixed(Number.isInteger(price) ? 0 : 2)}`;
+import { type Collection, formatPrice, products } from "@/lib/catalog";
+import { calculateShipping } from "@/lib/shipping";
 
 export default function Home() {
   const [filter, setFilter] = useState<Collection>("All");
@@ -36,6 +10,11 @@ export default function Home() {
   const [bagOpen, setBagOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [checkoutEmail, setCheckoutEmail] = useState("");
+  const [shippingCountry, setShippingCountry] = useState("CA");
+  const [shippingPostalCode, setShippingPostalCode] = useState("");
+  const [checkoutPending, setCheckoutPending] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
 
   const visibleProducts = useMemo(() => products.filter((product) => {
     const matchesCollection = filter === "All" || product.collection === filter;
@@ -45,10 +24,43 @@ export default function Home() {
 
   const cartItems = cart.map((id) => products.find((product) => product.id === id)!);
   const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+  const shippingQuote = calculateShipping(shippingCountry, Math.round(total * 100));
 
   function addToBag(id: number) {
     setCart((items) => [...items, id]);
     setBagOpen(true);
+  }
+
+  async function beginCheckout() {
+    if (!checkoutEmail.trim() || !shippingPostalCode.trim()) {
+      setCheckoutError("Add your email and postal code to continue.");
+      return;
+    }
+
+    const quantities = cart.reduce<Record<number, number>>((result, id) => {
+      result[id] = (result[id] ?? 0) + 1;
+      return result;
+    }, {});
+
+    setCheckoutPending(true);
+    setCheckoutError("");
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          email: checkoutEmail.trim(),
+          items: Object.entries(quantities).map(([id, quantity]) => ({ id: Number(id), quantity })),
+          shipping: { country: shippingCountry, postalCode: shippingPostalCode.trim() },
+        }),
+      });
+      const result = await response.json() as { url?: string; error?: string };
+      if (!response.ok || !result.url) throw new Error(result.error ?? "Checkout could not be started.");
+      window.location.assign(result.url);
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : "Checkout could not be started.");
+      setCheckoutPending(false);
+    }
   }
 
   return (
@@ -61,7 +73,7 @@ export default function Home() {
       <header className="site-header">
         <a className="wordmark" href="#" aria-label="Azzura home">AZZURA</a>
         <nav className="desktop-nav" aria-label="Main navigation">
-          <a href="#collections">Shop</a><a href="#classico">Classico</a><a href="#artista">Artista</a><a href="#leather">Leather</a><a href="#atelier">Our Atelier</a>
+          <a href="#collections">Shop</a><a href="#classico">Classico</a><a href="#artista">Artista</a><a href="#leather">Leather</a><a href="/track">Track order</a><a href="/account">Account</a>
         </nav>
         <div className="header-tools">
           <button type="button" onClick={() => setSearchOpen(true)} aria-label="Open search">Search</button>
@@ -182,7 +194,7 @@ export default function Home() {
       <footer>
         <a className="wordmark footer-mark" href="#">AZZURA</a>
         <div><p>Murano, Venezia<br />Italia</p><p>Objects of light,<br />made by hand.</p></div>
-        <nav aria-label="Footer navigation"><a href="#collections">Shop</a><a href="#atelier">Our story</a><a href="#">Care guide</a><a href="#">Contact</a></nav>
+        <nav aria-label="Footer navigation"><a href="#collections">Shop</a><a href="#atelier">Our story</a><a href="/track">Track order</a><a href="/account">My account</a></nav>
         <div className="footer-end"><p>Instagram&nbsp;&nbsp; Pinterest</p><p>© 2026 Azzura Venezia</p></div>
       </footer>
 
@@ -201,7 +213,18 @@ export default function Home() {
           <div className="bag-items">
             {cartItems.length === 0 ? <div className="empty-bag"><p>Your bag is waiting for something beautiful.</p><button type="button" onClick={() => setBagOpen(false)}>Explore the collection</button></div> : cartItems.map((item, index) => <div className="bag-item" key={`${item.id}-${index}`}><img src={item.image} alt="" /><div><h3>{item.name}</h3><p>{item.collection}</p><span>{formatPrice(item.price)}</span></div><button type="button" aria-label={`Remove ${item.name}`} onClick={() => setCart((items) => items.filter((_, itemIndex) => itemIndex !== index))}>Remove</button></div>)}
           </div>
-          {cartItems.length > 0 && <div className="bag-total"><p><span>Subtotal</span><strong>{formatPrice(total)}</strong></p><button type="button">Checkout <span>→</span></button><small>Shipping calculated at checkout.</small></div>}
+          {cartItems.length > 0 && <div className="bag-total">
+            <div className="checkout-fields">
+              <label>Email<input type="email" value={checkoutEmail} onChange={(event) => setCheckoutEmail(event.target.value)} autoComplete="email" placeholder="you@example.com" required /></label>
+              <div><label>Destination<select value={shippingCountry} onChange={(event) => setShippingCountry(event.target.value)}><option value="CA">Canada</option><option value="US">United States</option><option value="GB">United Kingdom</option><option value="IT">Italy</option><option value="FR">France</option><option value="DE">Germany</option><option value="ES">Spain</option><option value="AU">Australia</option><option value="JP">Japan</option></select></label><label>Postal code<input value={shippingPostalCode} onChange={(event) => setShippingPostalCode(event.target.value)} autoComplete="postal-code" placeholder="Postal code" required /></label></div>
+            </div>
+            <p><span>Subtotal</span><strong>{formatPrice(total)}</strong></p>
+            <p className="shipping-line"><span>{shippingQuote.label}<small>{shippingQuote.eta}</small></span><strong>{shippingQuote.amountCents === 0 ? "Free" : formatPrice(shippingQuote.amountCents / 100)}</strong></p>
+            <p className="checkout-total"><span>Total</span><strong>{formatPrice(total + shippingQuote.amountCents / 100)}</strong></p>
+            {checkoutError && <p className="checkout-error" role="alert">{checkoutError}</p>}
+            <button type="button" onClick={beginCheckout} disabled={checkoutPending}>{checkoutPending ? "Opening secure checkout…" : "Secure checkout"}<span>→</span></button>
+            <small>Payments are securely processed by Stripe.</small>
+          </div>}
         </aside>
       </div>}
     </main>
