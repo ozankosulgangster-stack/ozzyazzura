@@ -23,6 +23,9 @@ const products = [
   { id: 16, name: "Space Azure Watch", collection: "Artista", price: 99, image: "/space-azure-watch.jpg" },
   { id: 17, name: "Grazia Leather Handbag", collection: "Leather", price: 159, image: "/grazia-nero.jpg" },
   { id: 18, name: "Ambra Leather Handbag", collection: "Leather", price: 169, image: "/ambra-limone.jpg" },
+  { id: 19, name: "Bobbi Leather Bag", collection: "Leather", price: 139, image: "/bobbi-argento.jpg" },
+  { id: 20, name: "Lorena Leather Handbag", collection: "Leather", price: 169, image: "/lorena-cammello.jpg" },
+  { id: 21, name: "Rina Leather Wallet", collection: "Leather", price: 99, image: "/rina-cuoio.jpg" },
 ] as const;
 
 const formatPrice = (price: number) => `CA$${price.toFixed(Number.isInteger(price) ? 0 : 2)}`;
@@ -126,15 +129,30 @@ export default function Home() {
         <div className="leather-copy">
           <p className="eyebrow">Italian leather · Firenze</p>
           <h2 id="leather-title">Soft structure,<br />made to travel.</h2>
-          <p>Hand-finished in Florence from supple Italian leather. Grazia brings polished structure; Ambra is relaxed, compact, and made for every day.</p>
+          <p>Hand-finished in Florence from supple Italian leather. Structured handbags, compact crossbodies, and small accessories made for every day.</p>
           <button type="button" onClick={() => { setFilter("Leather"); document.querySelector(".shop")?.scrollIntoView(); }}>Shop leather <span>→</span></button>
-          <div className="leather-prices"><span>Grazia · CA$159</span><span>Ambra · CA$169</span></div>
+          <div className="leather-prices"><span>Grazia · CA$159</span><span>Ambra · CA$169</span><span>Bobbi · CA$139</span><span>Lorena · CA$169</span><span>Rina · CA$99</span></div>
         </div>
         <div className="leather-gallery" aria-label="Ambra and Grazia leather handbags">
           <figure className="leather-main"><img src="/grazia-nero.jpg" alt="Grazia structured black leather handbag" /><figcaption>Grazia · Nero</figcaption></figure>
           <figure><img src="/ambra-limone.jpg" alt="Ambra leather handbag in Limone yellow" /><figcaption>Ambra · Limone</figcaption></figure>
           <figure><img src="/ambra-nero.jpg" alt="Ambra leather handbag in Nero black" /><figcaption>Ambra · Nero</figcaption></figure>
           <figure><img src="/ambra-papavero.jpg" alt="Ambra leather handbag in Papavero orange" /><figcaption>Ambra · Papavero</figcaption></figure>
+        </div>
+      </section>
+
+      <section className="leather-newcomers" aria-labelledby="leather-new-title">
+        <div className="leather-new-heading">
+          <p className="eyebrow">New from Firenze</p>
+          <h2 id="leather-new-title">Bags for every rhythm.</h2>
+          <p>Bobbi moves lightly from day to evening. Lorena carries more without losing its line. Rina keeps the essentials beautifully close.</p>
+        </div>
+        <div className="leather-new-grid">
+          <figure className="bobbi-feature"><img src="/bobbi-argento.jpg" alt="Bobbi compact leather bag in Argento silver" /><figcaption>Bobbi · Argento</figcaption></figure>
+          <figure><img src="/bobbi-cuoio.jpg" alt="Bobbi compact leather bag in Cuoio tan" /><figcaption>Bobbi · Cuoio</figcaption></figure>
+          <figure><img src="/bobbi-testa-di-moro.jpg" alt="Bobbi compact leather bag in Testa di Moro brown" /><figcaption>Bobbi · Testa di Moro</figcaption></figure>
+          <figure><img src="/lorena-cammello.jpg" alt="Lorena leather handbag in Cammello tan" /><figcaption>Lorena · Cammello</figcaption></figure>
+          <figure><img src="/rina-cuoio.jpg" alt="Rina leather wallet in Cuoio tan" /><figcaption>Rina · Cuoio</figcaption></figure>
         </div>
       </section>
 
