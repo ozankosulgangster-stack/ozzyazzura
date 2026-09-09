@@ -66,7 +66,7 @@ export default function Home() {
   return (
     <main>
       <div className="announcement">
-        <span>Handmade in Murano, Venezia</span>
+        <span>Murano glass from Venice · Leather from Florence</span>
         <span>Complimentary shipping over CA$180</span>
       </div>
 
@@ -87,7 +87,7 @@ export default function Home() {
         <div className="hero-content">
           <p className="eyebrow">Venezia · Since 1987</p>
           <h1 id="hero-title">Objects of light,<br />made by hand.</h1>
-          <p className="hero-copy">Murano glass accessories shaped in fire, colour, and the quiet rhythm of the lagoon.</p>
+          <p className="hero-copy">Murano glass shaped in Venice and Italian leather finished in Florence—two traditions, made by hand.</p>
           <a className="primary-cta" href="#collections">Discover the collection <span aria-hidden="true">→</span></a>
         </div>
         <div className="hero-note" aria-hidden="true"><span>01</span><span className="hero-note-line" /><span>La forma dell’acqua</span></div>
@@ -180,9 +180,9 @@ export default function Home() {
       </section>
 
       <section className="promises" aria-label="Our promises">
-        <div><span>01</span><h3>Made in Murano</h3><p>Crafted entirely by hand on the Venetian island.</p></div>
-        <div><span>02</span><h3>Certificate included</h3><p>Every piece arrives with its certificate of origin.</p></div>
-        <div><span>03</span><h3>Beautifully wrapped</h3><p>Gift-ready, in recyclable Italian-made packaging.</p></div>
+        <div><span>01</span><h3>Glass from Venice</h3><p>Murano glass crafted by hand on the Venetian island.</p></div>
+        <div><span>02</span><h3>Leather from Florence</h3><p>Italian leather bags and accessories finished by Florentine artisans.</p></div>
+        <div><span>03</span><h3>Beautifully wrapped</h3><p>Gift-ready, with origin details in recyclable Italian-made packaging.</p></div>
       </section>
 
       <section className="newsletter" aria-labelledby="newsletter-title">
@@ -193,7 +193,7 @@ export default function Home() {
 
       <footer>
         <a className="wordmark footer-mark" href="#">AZZURA</a>
-        <div><p>Murano, Venezia<br />Italia</p><p>Objects of light,<br />made by hand.</p></div>
+        <div><p>Murano, Venezia<br />Firenze, Toscana</p><p>Italian craft,<br />made by hand.</p></div>
         <nav aria-label="Footer navigation"><a href="#collections">Shop</a><a href="#atelier">Our story</a><a href="/track">Track order</a><a href="/account">My account</a></nav>
         <div className="footer-end"><p>Instagram&nbsp;&nbsp; Pinterest</p><p>© 2026 Azzura Venezia</p></div>
       </footer>
