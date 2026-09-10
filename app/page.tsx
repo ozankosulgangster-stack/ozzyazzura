@@ -218,7 +218,7 @@ export default function Home() {
       <footer>
         <a className="wordmark footer-mark" href="#">AZZURA</a>
         <div><p>Murano, Venezia<br />Firenze, Toscana</p><p>Italian craft,<br />made by hand.</p></div>
-        <nav aria-label="Footer navigation"><a href="#collections">Shop</a><a href="#story">Our story</a><a href="#contact">Contact</a><a href="/track">Track order</a><a href="/account">My account</a></nav>
+        <nav aria-label="Footer navigation"><a href="#collections">Shop</a><a href="#story">Our story</a><a href="#contact">Contact</a><a href="/return-policy">Returns &amp; refunds</a><a href="/track">Track order</a><a href="/account">My account</a></nav>
         <div className="footer-end"><p>Instagram&nbsp;&nbsp; Pinterest</p><p>© 2026 Azzura Venezia</p></div>
       </footer>
 

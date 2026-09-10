@@ -5,7 +5,7 @@ import "./globals.css";
 const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ozzyazzura.com"),
+  metadataBase: new URL("https://ozzyazzura.ca"),
   title: "Azzura — Murano Glass & Italian Leather",
   description: "Handmade Murano glass accessories and Italian leather handbags, shaped by artisans in Venice and Florence.",
   openGraph: {
@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     description: "Murano glass and Italian leather, shaped by hand in Venice and Florence.",
     images: ["/og.png"],
   },
+  alternates: { canonical: "/" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

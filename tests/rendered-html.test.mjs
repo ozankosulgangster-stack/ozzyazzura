@@ -28,7 +28,20 @@ test("server-renders the Azzura commerce storefront", async () => {
   assert.match(html, /By subscribing, you agree to receive Azzura news/);
   assert.match(html, /href="\/track"/);
   assert.match(html, /href="\/account"/);
+  assert.match(html, /href="\/return-policy"/);
   assert.match(html, /Bag \(/);
+});
+
+test("renders a complete public return and refund policy", async () => {
+  const response = await render("/return-policy");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Return &amp; refund policy/i);
+  assert.match(html, /30-day return window/i);
+  assert.match(html, /Return shipping and fees/i);
+  assert.match(html, /Items that cannot be returned/i);
+  assert.match(html, /Refunds/i);
+  assert.match(html, /href="\/#contact"/);
 });
 
 test("renders the public order-tracking page", async () => {
