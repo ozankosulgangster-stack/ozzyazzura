@@ -80,3 +80,25 @@ export const contactMessages = sqliteTable("contact_messages", {
   status: text("status").notNull().default("new"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [index("idx_contact_messages_status_created_at").on(table.status, table.createdAt)]);
+
+export const inventory = sqliteTable("inventory", {
+  sku: text("sku").primaryKey(),
+  onHand: integer("on_hand").notNull().default(0),
+  reserved: integer("reserved").notNull().default(0),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+export const stockReservations = sqliteTable("stock_reservations", {
+  id: text("id").primaryKey(),
+  orderId: text("order_id").notNull().references(() => orders.id),
+  sku: text("sku").notNull().references(() => inventory.sku),
+  quantity: integer("quantity").notNull(),
+  status: text("status").notNull().default("held"),
+}, (table) => [index("idx_reservations_order").on(table.orderId)]);
+export const inventoryAdjustments = sqliteTable("inventory_adjustments", {
+  id: text("id").primaryKey(),
+  sku: text("sku").notNull().references(() => inventory.sku),
+  delta: integer("delta").notNull(),
+  reason: text("reason").notNull(),
+  actor: text("actor").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});

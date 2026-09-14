@@ -1,8 +1,10 @@
 import { env } from "cloudflare:workers";
+import { releaseOrderStock } from "@/lib/inventory";
 import { getDatabase } from "@/lib/db";
 
 type StripeSession = {
   id: string;
+  payment_status?: string;
   customer?: string | null;
   payment_intent?: string | null;
   customer_details?: { email?: string | null; name?: string | null; address?: { line1?: string | null; line2?: string | null; city?: string | null; state?: string | null; postal_code?: string | null; country?: string | null } | null } | null;
@@ -25,14 +27,17 @@ export async function POST(request: Request) {
   if (!orderId) return new Response("ok");
 
   const db = getDatabase();
-  if (event.type === "checkout.session.completed") {
+  if (event.type === "checkout.session.completed" && session.payment_status === "paid") {
     const email = session.customer_details?.email?.trim().toLowerCase() || null;
     const address = session.customer_details?.address;
-    await db.prepare(`UPDATE orders SET status = 'paid', email = COALESCE(?, email),
+    await db.batch([
+      db.prepare("UPDATE stock_reservations SET status = 'paid' WHERE order_id = ? AND status = 'held'").bind(orderId),
+      db.prepare(`UPDATE orders SET status = 'paid', email = COALESCE(?, email),
       stripe_payment_intent_id = ?, shipping_country = COALESCE(?, shipping_country),
       shipping_province = COALESCE(?, shipping_province), shipping_postal_code = COALESCE(?, shipping_postal_code),
-      updated_at = CURRENT_TIMESTAMP WHERE id = ?`)
-      .bind(email, session.payment_intent ?? null, address?.country ?? null, address?.state ?? null, address?.postal_code ?? null, orderId).run();
+      updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status IN ('pending', 'checkout_unknown')`)
+      .bind(email, session.payment_intent ?? null, address?.country ?? null, address?.state ?? null, address?.postal_code ?? null, orderId),
+    ]);
 
     const order = await db.prepare("SELECT customer_auth_user_id, email FROM orders WHERE id = ?")
       .bind(orderId).first<{ customer_auth_user_id: string | null; email: string }>();
@@ -53,8 +58,7 @@ export async function POST(request: Request) {
           address?.postal_code ?? null, address?.country ?? "CA").run();
     }
   } else if (event.type === "checkout.session.expired") {
-    await db.prepare("UPDATE orders SET status = 'expired', updated_at = CURRENT_TIMESTAMP WHERE id = ?")
-      .bind(orderId).run();
+    await releaseOrderStock(orderId, "expired");
   }
 
   return new Response("ok");

@@ -1,15 +1,40 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { type BagSelection, type Collection, checkoutLines, formatPrice, products, variantsForProduct } from "@/lib/catalog";
+import { useEffect, useMemo, useState } from "react";
+import { type BagSelection, type Collection, checkoutLines, formatPrice, products, stockSku, variantsForProduct } from "@/lib/catalog";
 import { calculateShipping } from "@/lib/shipping";
 import ContactForm from "./ContactForm";
 import SubscribeForm from "./SubscribeForm";
 
 export default function Home() {
+  const [stock, setStock] = useState<Record<string, number> | null>(null);
+  const [stockError, setStockError] = useState(false);
+  useEffect(() => {
+    let active = true;
+    async function refreshStock() {
+      try {
+        const response = await fetch("/api/inventory", { cache: "no-store" });
+        if (!response.ok) throw new Error("Stock unavailable");
+        const rows = await response.json() as Array<{ sku: string; available: number }>;
+        if (active) { setStock(Object.fromEntries(rows.map((row) => [row.sku, row.available]))); setStockError(false); }
+      } catch { if (active) { setStock(null); setStockError(true); } }
+    }
+    void refreshStock();
+    const interval = setInterval(refreshStock, 30000);
+    window.addEventListener("focus", refreshStock);
+    return () => { active = false; clearInterval(interval); window.removeEventListener("focus", refreshStock); };
+  }, []);
   const [filter, setFilter] = useState<Collection>("All");
   const [cart, setCart] = useState<BagSelection[]>([]);
   const [selectedColours, setSelectedColours] = useState<Record<number, string>>({});
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = Number(params.get("product"));
+    const colour = params.get("colour");
+    if (colour && variantsForProduct(id).some((variant) => variant.id === colour)) {
+      setSelectedColours({ [id]: colour });
+    }
+  }, []);
   const [bagOpen, setBagOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -35,6 +60,8 @@ export default function Home() {
 
   function addToBag(id: number) {
     const variantId = selectedColours[id] ?? variantsForProduct(id)[0]?.id;
+    const available = stock?.[stockSku(id, variantId)] ?? 0;
+    if (cart.filter((item) => item.id === id && item.variantId === variantId).length >= Math.min(available, 10)) return;
     setCart((items) => [...items, { id, variantId }]);
     setBagOpen(true);
   }
@@ -117,18 +144,21 @@ export default function Home() {
           {visibleProducts.map((product) => {
             const variants = variantsForProduct(product.id);
             const selected = variants.find((variant) => variant.id === selectedColours[product.id]) ?? variants[0];
+            const available = stock?.[stockSku(product.id, selected?.id)] ?? 0;
+            const inBag = cart.filter((item) => item.id === product.id && item.variantId === selected?.id).length;
             return (
-            <article className="product-card" key={product.id}>
+            <article className="product-card" id={`product-${product.id}`} key={product.id}>
               <div className="product-image-wrap">
                 <img src={selected?.image ?? product.image} alt={selected ? `${product.name} — ${selected.label}` : product.collection === "Leather" ? `${product.name}, handmade Italian leather` : `${product.name}, handmade Murano glass`} />
-                <button type="button" className="quick-add" onClick={() => addToBag(product.id)}>Add to bag <span aria-hidden="true">+</span></button>
+                <button type="button" className="quick-add" disabled={!stock || inBag >= Math.min(available, 10)} onClick={() => addToBag(product.id)}>{!stock ? "Checking stock" : available === 0 ? "Sold out" : inBag >= Math.min(available, 10) ? "Bag limit reached" : "Add to bag"} <span aria-hidden="true">+</span></button>
               </div>
               <div className="product-meta">
                 <div><h3>{product.name}</h3><p>{product.collection}</p></div><span>{formatPrice(product.price)}</span>
               </div>
+              <p className="stock-status">{!stock ? stockError ? "Stock unavailable — please try again shortly." : "Checking availability…" : available === 0 ? "Sold out" : available <= 3 ? `Only ${available} left` : "In stock"}</p>
               {variants.length > 0 && <label className="product-colour">Colour
                 <select aria-label={`Colour for ${product.name}`} value={selected?.id} onChange={(event) => setSelectedColours((current) => ({ ...current, [product.id]: event.target.value }))}>
-                  {variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.label}</option>)}
+                  {variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.label}{stock && (stock[stockSku(product.id, variant.id)] ?? 0) === 0 ? " — Sold out" : ""}</option>)}
                 </select>
               </label>}
             </article>
@@ -254,8 +284,9 @@ export default function Home() {
             <p><span>Subtotal</span><strong>{formatPrice(total)}</strong></p>
             <p className="shipping-line"><span>{shippingQuote.label}<small>{shippingQuote.eta}</small></span><strong>{shippingQuote.amountCents === 0 ? "Free" : formatPrice(shippingQuote.amountCents / 100)}</strong></p>
             <p className="checkout-total"><span>Total</span><strong>{formatPrice(total + shippingQuote.amountCents / 100)}</strong></p>
+            {stock && checkoutLines(cart).some((line) => line.quantity > (stock[stockSku(line.id, line.variantId)] ?? 0)) && <p className="checkout-error" role="alert">Stock has changed. Remove unavailable items or reduce quantities before checkout.</p>}
             {checkoutError && <p className="checkout-error" role="alert">{checkoutError}</p>}
-            <button type="button" onClick={beginCheckout} disabled={checkoutPending}>{checkoutPending ? "Opening secure checkout…" : "Secure checkout"}<span>→</span></button>
+            <button type="button" onClick={beginCheckout} disabled={checkoutPending || !stock || checkoutLines(cart).some((line) => line.quantity > (stock[stockSku(line.id, line.variantId)] ?? 0))}>{checkoutPending ? "Opening secure checkout…" : "Secure checkout"}<span>→</span></button>
             <small>Payments are securely processed by Stripe.</small>
           </div>}
         </aside>

@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers";
-import { cents, resolveSelection } from "@/lib/catalog";
+import { cents, resolveSelection, stockSku } from "@/lib/catalog";
 import { getDatabase } from "@/lib/db";
+import { releaseOrderStock } from "@/lib/inventory";
 import { calculateShipping } from "@/lib/shipping";
 
 type CheckoutBody = {
@@ -55,11 +56,22 @@ export async function POST(request: Request) {
       order_id, product_id, product_name, unit_price_cents, quantity
     ) VALUES (?, ?, ?, ?, ?)`)
       .bind(orderId, product.id, name, cents(product.price), quantity)),
+    ...validItems.map(({ product, variant, quantity }) => db.prepare(
+      "INSERT INTO stock_reservations (id, order_id, sku, quantity) VALUES (?, ?, ?, ?)"
+    ).bind(crypto.randomUUID(), orderId, stockSku(product.id, variant?.id), quantity)),
   ];
-  await db.batch(statements);
+  try {
+    await db.batch(statements);
+  } catch (error) {
+    if (String(error).includes("insufficient_stock")) {
+      return Response.json({ error: "Some items no longer have enough stock. Please update your bag." }, { status: 409 });
+    }
+    return Response.json({ error: "Stock could not be reserved. Please try again." }, { status: 503 });
+  }
 
   const params = new URLSearchParams();
   params.set("mode", "payment");
+  params.set("expires_at", String(Math.floor(Date.now() / 1000) + 31 * 60));
   params.set("payment_method_types[0]", "card");
   params.set("customer_creation", "always");
   params.set("customer_email", orderEmail);
@@ -84,15 +96,25 @@ export async function POST(request: Request) {
     params.set(`line_items[${index}][quantity]`, "1");
   }
 
-  const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
-    method: "POST",
-    headers: { authorization: `Bearer ${secretKey}`, "content-type": "application/x-www-form-urlencoded" },
-    body: params,
-  });
-  const stripeSession = await stripeResponse.json() as { id?: string; url?: string; error?: { message?: string } };
-  if (!stripeResponse.ok || !stripeSession.id || !stripeSession.url) {
-    await db.prepare("UPDATE orders SET status = 'checkout_failed', updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(orderId).run();
-    return Response.json({ error: stripeSession.error?.message ?? "Stripe checkout could not be created." }, { status: 502 });
+  let stripeSession: { id?: string; url?: string; error?: { message?: string } };
+  try {
+    const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+      method: "POST",
+      headers: { authorization: `Bearer ${secretKey}`, "content-type": "application/x-www-form-urlencoded", "idempotency-key": orderId },
+      body: params,
+    });
+    stripeSession = await stripeResponse.json();
+    if (!stripeResponse.ok || !stripeSession.id || !stripeSession.url) {
+      // A server error may hide a successfully created session. Keep its stock held.
+      if (stripeResponse.status >= 400 && stripeResponse.status < 500 && stripeResponse.status !== 409) {
+        await releaseOrderStock(orderId, "checkout_failed");
+        return Response.json({ error: "Secure checkout could not be opened. Please try again." }, { status: 502 });
+      }
+      throw new Error("Uncertain Stripe response");
+    }
+  } catch {
+    await db.prepare("UPDATE orders SET status = 'checkout_unknown', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'pending'").bind(orderId).run();
+    return Response.json({ error: `Checkout could not be confirmed. Please contact us with order ${orderNumber} before trying again.` }, { status: 503 });
   }
 
   await db.prepare("UPDATE orders SET stripe_session_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?")

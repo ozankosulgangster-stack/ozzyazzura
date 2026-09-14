@@ -81,3 +81,13 @@ export function resolveSelection(id: number, variantId?: unknown) {
   if (variants.length ? !variant : variantId !== undefined) return null;
   return { product, variant, name: variant ? `${product.name} — ${variant.label}` : product.name };
 }
+
+export function stockSku(id: number, variantId?: string) {
+  return `${id}:${variantId ?? "default"}`;
+}
+export const stockCatalog = products.flatMap((product) => {
+  const variants = variantsForProduct(product.id);
+  return variants.length
+    ? variants.map((variant) => ({ sku: stockSku(product.id, variant.id), name: `${product.name} — ${variant.label}` }))
+    : [{ sku: stockSku(product.id), name: product.name }];
+});
