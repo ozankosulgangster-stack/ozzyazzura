@@ -1,14 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { type Collection, formatPrice, products } from "@/lib/catalog";
+import { type BagSelection, type Collection, checkoutLines, formatPrice, products, variantsForProduct } from "@/lib/catalog";
 import { calculateShipping } from "@/lib/shipping";
 import ContactForm from "./ContactForm";
 import SubscribeForm from "./SubscribeForm";
 
 export default function Home() {
   const [filter, setFilter] = useState<Collection>("All");
-  const [cart, setCart] = useState<number[]>([]);
+  const [cart, setCart] = useState<BagSelection[]>([]);
+  const [selectedColours, setSelectedColours] = useState<Record<number, string>>({});
   const [bagOpen, setBagOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -24,12 +25,17 @@ export default function Home() {
     return matchesCollection && matchesQuery;
   }), [filter, query]);
 
-  const cartItems = cart.map((id) => products.find((product) => product.id === id)!);
+  const cartItems = cart.map(({ id, variantId }) => {
+    const product = products.find((product) => product.id === id)!;
+    const variant = variantsForProduct(id).find((option) => option.id === variantId);
+    return { ...product, image: variant?.image ?? product.image, colour: variant?.label };
+  });
   const total = cartItems.reduce((sum, item) => sum + item.price, 0);
   const shippingQuote = calculateShipping(shippingCountry, Math.round(total * 100));
 
   function addToBag(id: number) {
-    setCart((items) => [...items, id]);
+    const variantId = selectedColours[id] ?? variantsForProduct(id)[0]?.id;
+    setCart((items) => [...items, { id, variantId }]);
     setBagOpen(true);
   }
 
@@ -39,11 +45,6 @@ export default function Home() {
       return;
     }
 
-    const quantities = cart.reduce<Record<number, number>>((result, id) => {
-      result[id] = (result[id] ?? 0) + 1;
-      return result;
-    }, {});
-
     setCheckoutPending(true);
     setCheckoutError("");
     try {
@@ -52,7 +53,7 @@ export default function Home() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           email: checkoutEmail.trim(),
-          items: Object.entries(quantities).map(([id, quantity]) => ({ id: Number(id), quantity })),
+          items: checkoutLines(cart),
           shipping: { country: shippingCountry, postalCode: shippingPostalCode.trim() },
         }),
       });
@@ -113,17 +114,25 @@ export default function Home() {
           </div>
         </div>
         <div className="product-grid">
-          {visibleProducts.map((product) => (
+          {visibleProducts.map((product) => {
+            const variants = variantsForProduct(product.id);
+            const selected = variants.find((variant) => variant.id === selectedColours[product.id]) ?? variants[0];
+            return (
             <article className="product-card" key={product.id}>
               <div className="product-image-wrap">
-                <img src={product.image} alt={product.collection === "Leather" ? `${product.name}, handmade Italian leather` : `${product.name}, handmade Murano glass`} />
+                <img src={selected?.image ?? product.image} alt={selected ? `${product.name} — ${selected.label}` : product.collection === "Leather" ? `${product.name}, handmade Italian leather` : `${product.name}, handmade Murano glass`} />
                 <button type="button" className="quick-add" onClick={() => addToBag(product.id)}>Add to bag <span aria-hidden="true">+</span></button>
               </div>
               <div className="product-meta">
                 <div><h3>{product.name}</h3><p>{product.collection}</p></div><span>{formatPrice(product.price)}</span>
               </div>
+              {variants.length > 0 && <label className="product-colour">Colour
+                <select aria-label={`Colour for ${product.name}`} value={selected?.id} onChange={(event) => setSelectedColours((current) => ({ ...current, [product.id]: event.target.value }))}>
+                  {variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.label}</option>)}
+                </select>
+              </label>}
             </article>
-          ))}
+          );})}
         </div>
         {visibleProducts.length === 0 && <p className="empty-results">No pieces found. Try another search.</p>}
       </section>
@@ -235,7 +244,7 @@ export default function Home() {
         <aside className="bag-panel" onClick={(event) => event.stopPropagation()}>
           <div className="bag-heading"><div><p className="eyebrow">Your selection</p><h2>Bag ({cart.length})</h2></div><button className="close" type="button" onClick={() => setBagOpen(false)} aria-label="Close bag">×</button></div>
           <div className="bag-items">
-            {cartItems.length === 0 ? <div className="empty-bag"><p>Your bag is waiting for something beautiful.</p><button type="button" onClick={() => setBagOpen(false)}>Explore the collection</button></div> : cartItems.map((item, index) => <div className="bag-item" key={`${item.id}-${index}`}><img src={item.image} alt="" /><div><h3>{item.name}</h3><p>{item.collection}</p><span>{formatPrice(item.price)}</span></div><button type="button" aria-label={`Remove ${item.name}`} onClick={() => setCart((items) => items.filter((_, itemIndex) => itemIndex !== index))}>Remove</button></div>)}
+            {cartItems.length === 0 ? <div className="empty-bag"><p>Your bag is waiting for something beautiful.</p><button type="button" onClick={() => setBagOpen(false)}>Explore the collection</button></div> : cartItems.map((item, index) => <div className="bag-item" key={`${item.id}-${index}`}><img src={item.image} alt="" /><div><h3>{item.name}</h3><p>{item.colour ?? item.collection}</p><span>{formatPrice(item.price)}</span></div><button type="button" aria-label={`Remove ${item.name}`} onClick={() => setCart((items) => items.filter((_, itemIndex) => itemIndex !== index))}>Remove</button></div>)}
           </div>
           {cartItems.length > 0 && <div className="bag-total">
             <div className="checkout-fields">

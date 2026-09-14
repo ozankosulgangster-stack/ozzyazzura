@@ -37,3 +37,47 @@ export function formatPrice(price: number) {
 export function cents(price: number) {
   return Math.round(price * 100);
 }
+
+export type ColourVariant = { id: string; label: string; image: string };
+
+// Only colours documented in the existing product gallery are offered.
+const colourVariants: Record<number, ColourVariant[]> = {
+  17: [{ id: "nero", label: "Nero (black)", image: "/grazia-nero.jpg" }],
+  18: [
+    { id: "limone", label: "Limone (yellow)", image: "/ambra-limone.jpg" },
+    { id: "nero", label: "Nero (black)", image: "/ambra-nero.jpg" },
+    { id: "papavero", label: "Papavero (orange)", image: "/ambra-papavero.jpg" },
+  ],
+  19: [
+    { id: "argento", label: "Argento (silver)", image: "/bobbi-argento.jpg" },
+    { id: "cuoio", label: "Cuoio (tan)", image: "/bobbi-cuoio.jpg" },
+    { id: "testa-di-moro", label: "Testa di Moro (brown)", image: "/bobbi-testa-di-moro.jpg" },
+  ],
+  20: [{ id: "cammello", label: "Cammello (tan)", image: "/lorena-cammello.jpg" }],
+  21: [{ id: "cuoio", label: "Cuoio (tan)", image: "/rina-cuoio.jpg" }],
+};
+
+export function variantsForProduct(id: number): ColourVariant[] {
+  return colourVariants[id] ?? [];
+}
+
+export type BagSelection = { id: number; variantId?: string };
+
+export function checkoutLines(cart: BagSelection[]) {
+  const lines: Array<BagSelection & { quantity: number }> = [];
+  for (const selection of cart) {
+    const existing = lines.find((line) => line.id === selection.id && line.variantId === selection.variantId);
+    if (existing) existing.quantity += 1;
+    else lines.push({ ...selection, quantity: 1 });
+  }
+  return lines;
+}
+
+export function resolveSelection(id: number, variantId?: unknown) {
+  const product = productById(id);
+  if (!product) return null;
+  const variants = variantsForProduct(id);
+  const variant = variants.find((candidate) => candidate.id === variantId);
+  if (variants.length ? !variant : variantId !== undefined) return null;
+  return { product, variant, name: variant ? `${product.name} — ${variant.label}` : product.name };
+}

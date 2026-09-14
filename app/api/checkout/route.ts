@@ -1,11 +1,11 @@
 import { env } from "cloudflare:workers";
-import { cents, productById } from "@/lib/catalog";
+import { cents, resolveSelection } from "@/lib/catalog";
 import { getDatabase } from "@/lib/db";
 import { calculateShipping } from "@/lib/shipping";
 
 type CheckoutBody = {
   email?: string;
-  items?: Array<{ id?: number; quantity?: number }>;
+  items?: Array<{ id?: number; quantity?: number; variantId?: string }>;
   shipping?: { country?: string; province?: string; postalCode?: string };
 };
 
@@ -26,9 +26,9 @@ export async function POST(request: Request) {
   }
 
   const items = body.items.map((line) => {
-    const product = productById(Number(line.id));
-    const quantity = Number(line.quantity);
-    return product && Number.isInteger(quantity) && quantity > 0 && quantity <= 10 ? { product, quantity } : null;
+    const selection = line && resolveSelection(Number(line.id), line.variantId);
+    const quantity = Number(line?.quantity);
+    return selection && Number.isInteger(quantity) && quantity > 0 && quantity <= 10 ? { ...selection, quantity } : null;
   });
   if (items.some((item) => !item) || items.length > 30) {
     return Response.json({ error: "One or more bag items are invalid." }, { status: 400 });
@@ -51,10 +51,10 @@ export async function POST(request: Request) {
       total_cents, currency, shipping_country, shipping_province, shipping_postal_code
     ) VALUES (?, ?, ?, ?, 'pending', ?, ?, ?, 'cad', ?, ?, ?)`)
       .bind(orderId, orderNumber, authUserId, orderEmail, subtotalCents, quote.amountCents, totalCents, country, province, postalCode),
-    ...validItems.map(({ product, quantity }) => db.prepare(`INSERT INTO order_items (
+    ...validItems.map(({ product, name, quantity }) => db.prepare(`INSERT INTO order_items (
       order_id, product_id, product_name, unit_price_cents, quantity
     ) VALUES (?, ?, ?, ?, ?)`)
-      .bind(orderId, product.id, product.name, cents(product.price), quantity)),
+      .bind(orderId, product.id, name, cents(product.price), quantity)),
   ];
   await db.batch(statements);
 
@@ -70,9 +70,9 @@ export async function POST(request: Request) {
   params.set("success_url", `${new URL(request.url).origin}/checkout/success?order=${encodeURIComponent(orderNumber)}&session_id={CHECKOUT_SESSION_ID}`);
   params.set("cancel_url", `${new URL(request.url).origin}/checkout/cancel?order=${encodeURIComponent(orderNumber)}`);
 
-  validItems.forEach(({ product, quantity }, index) => {
+  validItems.forEach(({ product, name, quantity }, index) => {
     params.set(`line_items[${index}][price_data][currency]`, "cad");
-    params.set(`line_items[${index}][price_data][product_data][name]`, product.name);
+    params.set(`line_items[${index}][price_data][product_data][name]`, name);
     params.set(`line_items[${index}][price_data][unit_amount]`, String(cents(product.price)));
     params.set(`line_items[${index}][quantity]`, String(quantity));
   });

@@ -22,6 +22,9 @@ test("server-renders the Azzura commerce storefront", async () => {
   assert.match(html, /Mosaico Necklace/);
   assert.match(html, /CA\$49\.99/);
   assert.match(html, /Bobbi Leather Bag/);
+  assert.match(html, /Colour for Ambra Leather Handbag/);
+  assert.match(html, /value="papavero"/);
+  assert.match(html, /value="testa-di-moro"/);
   assert.match(html, /Design, chosen/);
   assert.match(html, /Italian partnerships/);
   assert.match(html, /href="#contact"/);
@@ -66,7 +69,7 @@ test("keeps pricing authoritative and payment secrets server-side", async () => 
   assert.doesNotMatch(page, /STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET/);
   assert.match(page, /beginCheckout/);
   assert.match(page, /Secure checkout/);
-  assert.match(checkout, /productById/);
+  assert.match(checkout, /resolveSelection/);
   assert.match(checkout, /line_items/);
   assert.match(migration, /CREATE TABLE `customers`/);
   assert.match(migration, /CREATE TABLE `orders`/);
