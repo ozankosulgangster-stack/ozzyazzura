@@ -8,6 +8,12 @@ test('migration prevents overselling and makes payment/expiry idempotent', () =>
   try {
     for (const name of ['0000_brainy_the_hunter', '0001_fearless_wendell_rand', '0002_superb_ultragirl']) db.exec(readFileSync(new URL(`../drizzle/${name}.sql`, import.meta.url), 'utf8'));
     assert.equal(db.prepare('SELECT count(*) AS n FROM inventory').get().n, 25);
+    const opening = readFileSync(new URL('../drizzle/0003_opening_stock.sql', import.meta.url), 'utf8');
+    db.exec(opening);
+    db.exec(opening);
+    assert.equal(db.prepare('SELECT sum(on_hand) AS n FROM inventory').get().n, 125);
+    assert.equal(db.prepare('SELECT count(*) AS n FROM inventory_adjustments').get().n, 25);
+    db.exec('UPDATE inventory SET on_hand=0');
     db.exec("INSERT INTO orders (id,order_number,email,subtotal_cents,shipping_cents,total_cents,shipping_country,shipping_postal_code) VALUES ('o','AZ-test','test@example.com',100,0,100,'CA','M1M1M1')");
     db.exec("INSERT INTO inventory_adjustments (id,sku,delta,reason,actor) VALUES ('a','18:nero',2,'Opening count','test')");
     const stock = () => ({ ...db.prepare("SELECT on_hand,reserved FROM inventory WHERE sku='18:nero'").get() });

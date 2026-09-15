@@ -17,7 +17,7 @@ If Google returns `GCP_NOT_REGISTERED`, a Merchant administrator must register t
 1. Enable Merchant API in the Google Cloud project, complete Google's developer registration, and grant the service account access to the Merchant Center account.
 2. Select a primary **API** data source for English products with feed label CA. Verify/claim ozzyazzura.ca and configure shipping in Merchant Center.
 3. Set server-side hosting values: `GOOGLE_MERCHANT_ACCOUNT_ID` (numeric), `GOOGLE_MERCHANT_DATA_SOURCE_ID` (numeric), `GOOGLE_MERCHANT_PRIVATE_KEY` (PKCS#8 PEM, actual or escaped newlines), and `MERCHANT_SYNC_TOKEN` (random secret, at least 32 characters). Never commit keys or tokens.
-4. Apply D1 migration `0002_superb_ultragirl.sql` and enter actual opening counts at `/admin/inventory` using the configured `ADMIN_EMAIL` account. All 25 product/colour SKUs start at zero. Until counted, checkout and Google listings show sold out.
+4. Apply D1 migration `0002_superb_ultragirl.sql` and enter actual opening counts at `/admin/inventory` using the configured `ADMIN_EMAIL` account. Migration `0003_opening_stock.sql` records the owner-confirmed opening count of 5 for each of the 25 product/colour SKUs (125 total), dated 2026-09-15. It uses stable adjustment IDs so repeat execution does not add stock twice. New SKUs otherwise start at zero.
 5. Deploy, preview the catalogue, then trigger sync. A GitHub push alone does not deploy the Sites-hosted website.
 
 ## Endpoints
