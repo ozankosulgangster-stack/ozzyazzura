@@ -21,6 +21,9 @@
 # misc
 .DS_Store
 *.pem
+*-merchant-integration-*.json
+*service-account*.json
+.dev.vars*
 
 # debug
 npm-debug.log*

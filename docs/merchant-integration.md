@@ -2,6 +2,16 @@
 
 Uses Merchant API v1 with `azzura-merchant-sync@azzura-merchant-integration.iam.gserviceaccount.com`. The email alone does not activate synchronization.
 
+The credential-free account configuration is in `config/merchant.json`: account `5849769477`, data source `10724457938`, Cloud project `azzura-merchant-integration` (`66451850456`). The downloaded service-account JSON must remain outside the repository; its private key belongs only in hosting secrets.
+
+Validate the downloaded key and API access without uploading products:
+
+```sh
+node scripts/check-merchant.mjs /absolute/path/to/downloaded-key.json
+```
+
+If Google returns `GCP_NOT_REGISTERED`, a Merchant administrator must register the Cloud project. The script optionally accepts the existing human administrator's email as a second argument to call `developerRegistration:registerGcp`; this assigns the API developer contact role. The service account making that call needs Merchant administrator permission. After successful registration, allow up to five minutes and run the read-only check again. Do not use the service-account email as the human developer contact.
+
 ## Activation
 
 1. Enable Merchant API in the Google Cloud project, complete Google's developer registration, and grant the service account access to the Merchant Center account.

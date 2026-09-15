@@ -1,0 +1,10 @@
+{
+  "projectId": "azzura-merchant-integration",
+  "projectNumber": "66451850456",
+  "serviceAccountEmail": "azzura-merchant-sync@azzura-merchant-integration.iam.gserviceaccount.com",
+  "merchantAccountId": "5849769477",
+  "dataSourceId": "10724457938",
+  "contentLanguage": "en",
+  "feedLabel": "CA",
+  "storeUrl": "https://ozzyazzura.ca"
+}
