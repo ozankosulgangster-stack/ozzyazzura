@@ -20,7 +20,7 @@ test("server-renders the Azzura commerce storefront", async () => {
   const html = await response.text();
   assert.match(html, /<title>Azzura — Murano Glass &amp; Italian Leather<\/title>/i);
   assert.match(html, /Mosaico Necklace/);
-  assert.match(html, /CA\$49\.99/);
+  assert.match(html, /CA\$69\.99/);
   assert.match(html, /Bobbi Leather Bag/);
   assert.match(html, /Colour for Ambra Leather Handbag/);
   assert.match(html, /value="papavero"/);

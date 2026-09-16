@@ -16,7 +16,7 @@ test('offers preserve variant identities, exact CAD prices and stock availabilit
   assert.equal(black.productAttributes.color, 'Nero (black)');
   assert.equal(black.productAttributes.link, 'https://ozzyazzura.ca/products/18?colour=nero');
   assert.equal(items.find((item) => item.offerId === '18:limone').productAttributes.availability, 'OUT_OF_STOCK');
-  assert.deepEqual(items.find((item) => item.offerId === '2:default').productAttributes.price, { amountMicros: '24990000', currencyCode: 'CAD' });
+  assert.deepEqual(items.find((item) => item.offerId === '2:default').productAttributes.price, { amountMicros: '34990000', currencyCode: 'CAD' });
 });
 
 test('integration rejects missing, short and incorrect tokens', async () => {

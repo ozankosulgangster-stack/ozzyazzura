@@ -184,7 +184,7 @@ export default function Home() {
           <h2 id="leather-title">Soft structure,<br />made to travel.</h2>
           <p>Hand-finished in Florence from supple Italian leather. Structured handbags, compact crossbodies, and small accessories made for every day.</p>
           <button type="button" onClick={() => { setFilter("Leather"); document.querySelector(".shop")?.scrollIntoView(); }}>Shop leather <span>→</span></button>
-          <div className="leather-prices"><span>Grazia · CA$159</span><span>Ambra · CA$169</span><span>Bobbi · CA$139</span><span>Lorena · CA$169</span><span>Rina · CA$99</span></div>
+          <div className="leather-prices">{products.filter((product) => product.collection === "Leather").map((product) => <span key={product.id}>{product.name.split(" ")[0]} · {formatPrice(product.price)}</span>)}</div>
         </div>
         <div className="leather-gallery" aria-label="Ambra and Grazia leather handbags">
           <figure className="leather-main"><img src="/grazia-nero.jpg" alt="Grazia structured black leather handbag" /><figcaption>Grazia · Nero</figcaption></figure>
