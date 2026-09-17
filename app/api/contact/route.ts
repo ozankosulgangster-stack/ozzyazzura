@@ -1,4 +1,6 @@
 import { getDatabase } from "@/lib/db";
+import { env } from "cloudflare:workers";
+import { sendContactNotification, type ContactEmailConfig } from "@/lib/contact-email";
 
 type ContactBody = {
   name?: string;
@@ -14,27 +16,34 @@ function validEmail(email: string) {
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null) as ContactBody | null;
-  if (body?.website?.trim()) return Response.json({ saved: true });
+  if (typeof body?.website === "string" && body.website.trim()) return Response.json({ saved: true, notification: "accepted" });
 
-  const name = body?.name?.trim() ?? "";
-  const email = body?.email?.trim().toLowerCase() ?? "";
-  const message = body?.message?.trim() ?? "";
+  const name = typeof body?.name === "string" ? body.name.trim() : "";
+  const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+  const message = typeof body?.message === "string" ? body.message.trim() : "";
   const marketingOptIn = body?.marketingOptIn === true;
   if (!name || name.length > 120 || !validEmail(email) || !message || message.length > 4000) {
     return Response.json({ error: "Add your name, a valid email, and a message." }, { status: 400 });
   }
 
-  const db = getDatabase();
-  const statements = [db.prepare(`INSERT INTO contact_messages
-    (id, name, email, message, marketing_opt_in) VALUES (?, ?, ?, ?, ?)`)
-    .bind(crypto.randomUUID(), name, email, message, marketingOptIn ? 1 : 0)];
-  if (marketingOptIn) {
-    statements.push(db.prepare(`INSERT INTO subscribers (email, full_name, source, status)
-      VALUES (?, ?, 'contact_form', 'active')
-      ON CONFLICT(email) DO UPDATE SET full_name = excluded.full_name, source = 'contact_form',
-        status = 'active', consent_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP`)
-      .bind(email, name));
+  const id = crypto.randomUUID();
+  try {
+    const db = getDatabase();
+    const statements = [db.prepare(`INSERT INTO contact_messages
+      (id, name, email, message, marketing_opt_in) VALUES (?, ?, ?, ?, ?)`)
+      .bind(id, name, email, message, marketingOptIn ? 1 : 0)];
+    if (marketingOptIn) {
+      statements.push(db.prepare(`INSERT INTO subscribers (email, full_name, source, status)
+        VALUES (?, ?, 'contact_form', 'active')
+        ON CONFLICT(email) DO UPDATE SET full_name = excluded.full_name, source = 'contact_form',
+          status = 'active', consent_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP`)
+        .bind(email, name));
+    }
+    await db.batch(statements);
+  } catch {
+    return Response.json({ error: "We couldn’t save your enquiry. Please email ozan@ozzyazzura.ca directly." }, { status: 503 });
   }
-  await db.batch(statements);
-  return Response.json({ saved: true });
+  const notification = await sendContactNotification(env as ContactEmailConfig, { id, name, email, message });
+  if (notification === "unavailable") console.warn("Contact notification unavailable", { id });
+  return Response.json({ saved: true, notification }, { headers: { "cache-control": "no-store" } });
 }
