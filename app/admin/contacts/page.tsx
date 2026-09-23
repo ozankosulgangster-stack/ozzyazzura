@@ -1,4 +1,4 @@
-import { env } from "cloudflare:workers";
+const env = process.env;
 import { requireChatGPTUser } from "@/app/chatgpt-auth";
 import { getDatabase } from "@/lib/db";
 

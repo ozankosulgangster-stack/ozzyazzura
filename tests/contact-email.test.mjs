@@ -38,7 +38,7 @@ async function route({ databaseFails = false } = {}) {
   };
   const source = (await readFile(new URL('../app/api/contact/route.ts', import.meta.url), 'utf8'))
     .replace('import { getDatabase } from "@/lib/db";', 'const getDatabase = () => globalThis.contactTest.db;')
-    .replace('import { env } from "cloudflare:workers";', 'const env = {};')
+    .replace('const env = process.env;', 'const env = {};')
     .replace('import { sendContactNotification, type ContactEmailConfig } from "@/lib/contact-email";', 'const sendContactNotification = (...args) => globalThis.contactTest.notify(...args);');
   const { POST } = await import(moduleUrl(source));
   return { calls, post: body => POST(new Request('https://example.com/api/contact', { method: 'POST', body: JSON.stringify(body) })) };
