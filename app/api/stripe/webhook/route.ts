@@ -1,4 +1,4 @@
-import { env } from "cloudflare:workers";
+const env = process.env;
 import { releaseOrderStock } from "@/lib/inventory";
 import { getDatabase } from "@/lib/db";
 

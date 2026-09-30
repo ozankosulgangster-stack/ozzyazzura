@@ -1,4 +1,4 @@
-import { env } from "cloudflare:workers";
+const env = process.env;
 import { readInventory } from "@/lib/inventory";
 import { authorizedMerchantRequest, merchantConfigured, merchantProducts, syncMerchantProducts, type MerchantConfig } from "@/lib/merchant";
 

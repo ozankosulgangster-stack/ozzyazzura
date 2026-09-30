@@ -2,16 +2,21 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function render(path = "/") {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}-${path}`);
-  const { default: worker } = await import(workerUrl.href);
-  return worker.fetch(
-    new Request(`http://localhost${path}`, { headers: { accept: "text/html" } }),
-    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
-    { waitUntil() {}, passThroughOnException() {} },
-  );
-}
+import { before, after } from "node:test";
+import { spawn } from "node:child_process";
+let server;
+const origin = "http://127.0.0.1:4189";
+before(async () => {
+  server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "--hostname", "127.0.0.1", "--port", "4189"], {
+    env: { ...process.env, NEXTAUTH_URL: origin, NEXTAUTH_SECRET: "local-test-secret-only-not-for-production", TURSO_DATABASE_URL: ":memory:" }, stdio: "ignore"
+  });
+  for (let attempt = 0; attempt < 100; attempt++) {
+    try { await fetch(origin); return; } catch { await new Promise(resolve => setTimeout(resolve, 100)); }
+  }
+  throw new Error("Next.js test server did not start");
+});
+after(() => server?.kill());
+async function render(path = "/") { return fetch(origin + path); }
 
 test("server-renders the Azzura commerce storefront", async () => {
   const response = await render();
@@ -80,4 +85,15 @@ test("keeps pricing authoritative and payment secrets server-side", async () => 
   assert.match(subscribersApi, /ON CONFLICT\(email\) DO UPDATE/);
   assert.match(contactApi, /marketingOptIn/);
   assert.equal(JSON.parse(hosting).d1, "DB");
+});
+
+test("forged host identity headers cannot grant admin or customer access", async () => {
+  const headers = { "oai-authenticated-user-email": "owner@example.com", "oai-authenticated-user-id": "owner" };
+  const response = await fetch(origin + "/api/admin/orders", { headers });
+  assert.equal(response.status, 403);
+  const account = await fetch(origin + "/account", { headers, redirect: "manual" });
+  assert.equal(account.status, 307);
+  assert.match(account.headers.get("location"), /api\/auth\/signin/);
+  const csrf = await fetch(origin + "/api/admin/inventory", { method: "POST", headers: { ...headers, origin: "https://attacker.example", "content-type": "application/json" }, body: "{}" });
+  assert.equal(csrf.status, 403);
 });

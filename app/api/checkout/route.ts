@@ -1,4 +1,5 @@
-import { env } from "cloudflare:workers";
+import { getUser } from "@/lib/auth";
+const env = process.env;
 import { cents, resolveSelection, stockSku } from "@/lib/catalog";
 import { getDatabase } from "@/lib/db";
 import { releaseOrderStock } from "@/lib/inventory";
@@ -16,6 +17,8 @@ export async function POST(request: Request) {
     return Response.json({ error: "Secure checkout is not yet activated. Please contact Azzura." }, { status: 503 });
   }
 
+  const origin = process.env.NEXTAUTH_URL;
+  if (!origin) return Response.json({ error: "Checkout URL is not configured." }, { status: 503 });
   const body = await request.json().catch(() => null) as CheckoutBody | null;
   const email = body?.email?.trim().toLowerCase();
   const country = body?.shipping?.country?.trim().toUpperCase();
@@ -41,8 +44,9 @@ export async function POST(request: Request) {
   const totalCents = subtotalCents + quote.amountCents;
   const orderId = crypto.randomUUID();
   const orderNumber = `AZ-${Date.now().toString(36).toUpperCase()}-${crypto.randomUUID().slice(0, 4).toUpperCase()}`;
-  const authUserId = request.headers.get("oai-authenticated-user-id");
-  const authenticatedEmail = request.headers.get("oai-authenticated-user-email")?.trim().toLowerCase();
+  const user = await getUser();
+  const authUserId = user?.userId ?? null;
+  const authenticatedEmail = (await getUser())?.email;
   const orderEmail = authenticatedEmail || email;
   const db = getDatabase();
 
@@ -79,8 +83,8 @@ export async function POST(request: Request) {
   params.set("shipping_address_collection[allowed_countries][0]", country);
   params.set("metadata[order_id]", orderId);
   params.set("metadata[order_number]", orderNumber);
-  params.set("success_url", `${new URL(request.url).origin}/checkout/success?order=${encodeURIComponent(orderNumber)}&session_id={CHECKOUT_SESSION_ID}`);
-  params.set("cancel_url", `${new URL(request.url).origin}/checkout/cancel?order=${encodeURIComponent(orderNumber)}`);
+  params.set("success_url", `${new URL(origin).origin}/checkout/success?order=${encodeURIComponent(orderNumber)}&session_id={CHECKOUT_SESSION_ID}`);
+  params.set("cancel_url", `${new URL(origin).origin}/checkout/cancel?order=${encodeURIComponent(orderNumber)}`);
 
   validItems.forEach(({ product, name, quantity }, index) => {
     params.set(`line_items[${index}][price_data][currency]`, "cad");
