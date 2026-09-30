@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "test": "node --test tests/colour-variants.test.mjs tests/inventory.test.mjs tests/merchant.test.mjs tests/contact-email.test.mjs tests/netlify-db.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
