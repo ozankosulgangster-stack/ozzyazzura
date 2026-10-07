@@ -1,4 +1,4 @@
-import { env } from "cloudflare:workers";
+const env = process.env;
 import Link from "next/link";
 import { requireChatGPTUser } from "@/app/chatgpt-auth";
 import InventoryManager from "./InventoryManager";

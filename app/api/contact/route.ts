@@ -1,5 +1,5 @@
 import { getDatabase } from "@/lib/db";
-import { env } from "cloudflare:workers";
+const env = process.env;
 import { sendContactNotification, type ContactEmailConfig } from "@/lib/contact-email";
 
 type ContactBody = {

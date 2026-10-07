@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
@@ -24,5 +25,14 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body className={geist.variable}>{children}</body></html>;
+  return <html lang="en"><body className={geist.variable}>
+    {children}
+    <Script src="https://www.googletagmanager.com/gtag/js?id=G-ZV5ZF35SP1" strategy="afterInteractive" />
+    <Script id="google-analytics" strategy="afterInteractive">{`
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-ZV5ZF35SP1');
+    `}</Script>
+  </body></html>;
 }

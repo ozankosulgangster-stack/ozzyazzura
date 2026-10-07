@@ -1,3 +1,4 @@
+import { getUser } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 
 type ProfileBody = {
@@ -11,8 +12,9 @@ type ProfileBody = {
 };
 
 export async function PATCH(request: Request) {
-  const authUserId = request.headers.get("oai-authenticated-user-id");
-  const email = request.headers.get("oai-authenticated-user-email")?.trim().toLowerCase();
+  const user = await getUser();
+  const authUserId = user?.userId ?? null;
+  const email = (await getUser())?.email;
   if (!authUserId || !email) return Response.json({ error: "Sign in is required." }, { status: 401 });
 
   const body = await request.json().catch(() => null) as ProfileBody | null;
